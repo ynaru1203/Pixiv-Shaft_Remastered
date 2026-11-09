@@ -12,6 +12,7 @@ class TokenAuthenticator(
 
     override fun authenticate(route: Route?, response: Response): Request? {
         if (!AuthRoutes.requiresSession(response.request.url.encodedPath)) return null
+        val sessions = response.request.tag(SessionProvider::class.java) ?: sessions
         val path = response.request.url.encodedPath
         val responseCount = responseCount(response)
         if (responseCount >= 2) {

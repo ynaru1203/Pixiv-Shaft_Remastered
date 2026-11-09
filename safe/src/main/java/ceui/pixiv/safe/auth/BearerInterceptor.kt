@@ -1,5 +1,6 @@
 package ceui.pixiv.safe.auth
 
+import java.io.IOException
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -29,7 +30,11 @@ class BearerInterceptor(private val sessions: SessionProvider) : Interceptor {
             return chain.proceed(request)
         }
 
-        val token = sessions.accessTokenOrBootstrap()
+        val alternate = request.tag(SessionProvider::class.java)
+        val token = (alternate ?: sessions).accessTokenOrBootstrap()
+        if (alternate != null && token.isNullOrBlank()) {
+            throw IOException("Search account authentication unavailable")
+        }
         val authenticated =
             if (token.isNullOrBlank()) {
                 AuthLog.warning("bearer unavailable; continuing migration fallback path=$path")

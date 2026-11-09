@@ -117,6 +117,7 @@ class SearchNovelRepo @JvmOverloads constructor(
         val usePopularPreview = selectedPopularPreview || (wantsPremiumOnlySort && !nana7miEnabled)
         // 仅喜欢数筛选（date 排序）在借号被远程关掉时不能落 preview（排序会被偷换成热度预览），
         // 落到下面 else 的普通直连
+        currentNana7miSession.rotateOnQuota = wantsPremiumOnlySort
         val useBorrowedOfficial = nana7miEnabled && !selectedPopularPreview &&
                 (wantsPremiumOnlySort || wantsPremiumBookmarkFilter)
 
@@ -322,7 +323,7 @@ class SearchNovelRepo @JvmOverloads constructor(
                 sortType,
                 assembledKeyword.length,
             )
-            val result = lease.guarded { currentNana7miSession.fetchReady(firstRequestId) }
+            val result = lease.guarded { currentNana7miSession.fetchReady(firstRequestId, firstPage = true) }
             val borrowed = currentNana7miSession.payload
             if (borrowed == null || borrowed.expired) {
                 return@run fallbackAfterBorrowFailure(currentNana7miSession.resultLabel(result))

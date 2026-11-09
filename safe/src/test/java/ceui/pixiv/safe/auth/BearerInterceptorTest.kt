@@ -60,6 +60,25 @@ class BearerInterceptorTest {
         }
     }
 
+    @Test
+    fun `tagged search uses the alternate session`() {
+        val primary = FakeProvider("primary")
+        val alternate = FakeProvider("alternate")
+        MockWebServer().use { server ->
+            server.enqueue(MockResponse().setResponseCode(200))
+            val client = OkHttpClient.Builder().addInterceptor(BearerInterceptor(primary)).build()
+            val request = Request.Builder()
+                .url(server.url("/v1/account/nana7mi"))
+                .tag(SessionProvider::class.java, alternate)
+                .build()
+
+            client.newCall(request).execute().close()
+
+            assertEquals("Bearer alternate", server.takeRequest().getHeader("Authorization"))
+            assertEquals(0, primary.bootstrapCalls)
+        }
+    }
+
     private class FakeProvider(private var token: String?) : SessionProvider {
         var bootstrapCalls: Int = 0
 

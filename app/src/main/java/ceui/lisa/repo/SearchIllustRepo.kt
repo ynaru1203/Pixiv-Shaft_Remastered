@@ -135,6 +135,7 @@ class SearchIllustRepo @JvmOverloads constructor(
         val usePopularPreview = selectedPopularPreview || (wantsPremiumOnlySort && !nana7miEnabled)
         // 仅喜欢数筛选（date 排序）在借号被远程关掉时**不能**落 preview——那会把排序偷换成
         // 热度预览；落到下面 else 的普通直连，排序保真、bookmark 靠客户端兜底。
+        currentNana7miSession.rotateOnQuota = wantsPremiumOnlySort
         val useBorrowedOfficial = nana7miEnabled && !selectedPopularPreview &&
                 (wantsPremiumOnlySort || wantsPremiumBookmarkFilter)
 
@@ -314,7 +315,7 @@ class SearchIllustRepo @JvmOverloads constructor(
                 sortType,
                 assembledKeyword.length,
             )
-            val result = lease.guarded { currentNana7miSession.fetchReady(firstRequestId) }
+            val result = lease.guarded { currentNana7miSession.fetchReady(firstRequestId, firstPage = true) }
             val newNana7mi = currentNana7miSession.payload
             if (newNana7mi == null || newNana7mi.expired) {
                 return@run fallbackAfterBorrowFailure(currentNana7miSession.resultLabel(result))

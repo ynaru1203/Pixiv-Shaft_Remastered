@@ -2973,6 +2973,8 @@
 
     <!-- Account manager (V3 / MD3-E redesign) -->
     <string name="account_switch_current_badge">Currently in use</string>
+    <string name="account_switch_primary_badge">Primary account</string>
+    <string name="account_switch_extension_badge">Quota extension account</string>
     <string name="account_switch_premium">Premium</string>
     <string name="account_switch_others">Other accounts</string>
     <string name="account_switch_others_hint">Tap to switch</string>
@@ -2999,7 +3001,6 @@
 
     <!-- 借号用量页（服务端两只配额桶的只读视图） -->
     <string name="nana7mi_usage_title">Usage</string>
-    <string name="nana7mi_usage_motto">Failure is the mother of success\nPaying is a successful payment</string>
     <string name="nana7mi_usage_section">Search-by-popularity limits</string>
     <string name="nana7mi_usage_window_session">Current session</string>
     <string name="nana7mi_usage_window_weekly">Weekly limit</string>
@@ -3018,50 +3019,9 @@
     <string name="nana7mi_usage_error">Could not load usage</string>
     <string name="nana7mi_usage_retry">Tap to retry</string>
     <string name="nana7mi_usage_login_required">Log in to see your usage</string>
-    <string name="nana7mi_usage_cta_title">Unlock more usage</string>
-    <string name="nana7mi_usage_plan_price">¥%1$s</string>
-    <string name="nana7mi_usage_plan_period">/ mo</string>
-    <string name="nana7mi_usage_plan_badge">Better value</string>
-    <string name="nana7mi_usage_plan_current">Current plan</string>
     <string name="nana7mi_usage_plan_label_current">Current plan %1$s (%2$dx)</string>
-    <string name="nana7mi_usage_plan_expires">Expires %1$s</string>
-    <string name="nana7mi_usage_plan_current_no_expiry">Subscribed</string>
-    <string name="nana7mi_usage_plan_5x_title">5x usage</string>
-    <string name="nana7mi_usage_plan_5x_desc">Plenty for everyday searching</string>
-    <string name="nana7mi_usage_plan_20x_title">20x usage</string>
-    <string name="nana7mi_usage_plan_20x_desc">For heavy users — search freely</string>
-    <string name="nana7mi_usage_plan_feature_check">✓</string>
-    <string name="nana7mi_usage_plan_feature_sort">Sort any keyword by popularity</string>
-    <string name="nana7mi_usage_plan_feature_multiplier">%1$d× quota, on both the 5-hour and weekly limits</string>
-    <string name="nana7mi_usage_plan_feature_lapse">Returns to Free automatically when it ends</string>
-    <string name="nana7mi_usage_plan_cta_choose">Choose %1$s</string>
-    <string name="nana7mi_usage_plan_cta_renew">Renew</string>
-    <string name="nana7mi_usage_plan_cta_loading">Opening…</string>
-    <string name="nana7mi_usage_plan_unavailable">Subscriptions are unavailable right now</string>
-    <string name="nana7mi_usage_plan_checkout_failed">Could not open checkout — please retry</string>
-    <string name="nana7mi_usage_plan_no_browser">No browser found</string>
     <string name="nana7mi_usage_refresh_failed">Refresh failed, try again later</string>
-    <string name="nana7mi_usage_plan_arrived">Subscription activated</string>
-    <string name="nana7mi_usage_plan_still_pending">Not activated yet — pull down to refresh in a moment</string>
-    <string name="nana7mi_usage_plan_cta_included">Included in your plan</string>
-    <string name="nana7mi_usage_plan_lower_desc">Available again after your current plan expires</string>
-    <string name="nana7mi_usage_claim_entry">Paid on 爱发电 but nothing arrived?</string>
-    <string name="nana7mi_usage_claim_title">Restore purchase</string>
-    <string name="nana7mi_usage_claim_label">Order no.</string>
-    <string name="nana7mi_usage_claim_hint">Digits only</string>
-    <string name="nana7mi_usage_claim_help">Find it under 我的 → 订单 in the 爱发电 app or website. Only needed for orders placed directly on 爱发电 rather than from this page.</string>
-    <string name="nana7mi_usage_claim_confirm">Restore</string>
-    <string name="nana7mi_usage_claim_ok">Activated</string>
-    <string name="nana7mi_usage_claim_not_found">Order not found — check the number</string>
-    <string name="nana7mi_usage_claim_not_paid">This order hasn\'t been paid for yet</string>
-    <string name="nana7mi_usage_claim_not_a_plan">This order isn\'t a Pro / Max plan, so it can\'t be redeemed</string>
-    <string name="nana7mi_usage_claim_taken">This order has already been used</string>
-    <string name="nana7mi_usage_claim_refused">This order needs a manual check — please contact the developer</string>
-    <string name="nana7mi_usage_claim_retry">Service unavailable, try again shortly</string>
-    <string name="nana7mi_usage_claim_bad">That doesn\'t look like an order number</string>
     <string name="drawer_section_usage">Search by popularity</string>
-    <string name="nana7mi_quota_snack_session">5-hour limit reached, back in %1$s</string>
-    <string name="nana7mi_quota_snack_weekly">Weekly limit reached, back in %1$s</string>
     <string name="nana7mi_quota_snack_action">View usage</string>
     <!-- 应用内推送（付费用户公告，pixshaft 控制台下发，只弹一次） -->
     <string name="inapp_push_dismiss">Got it</string>
@@ -3652,4 +3612,6 @@
     <string name="ai_results_clear_success">Selected result images cleared</string>
     <string name="ai_results_clear_failed">Some result images could not be removed. Try again.</string>
     <string name="ai_results_stats_failed">Could not calculate size</string>
+    <string name="nana7mi_quota_dialog_title">Popularity search limit reached</string>
+    <string name="nana7mi_quota_dialog_message">Only popularity previews are shown for now. Add a quota extension account on the account switching screen to continue using full popularity search.</string>
 </resources>

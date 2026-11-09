@@ -31,6 +31,7 @@ open class BackendSessionManager
 internal constructor(
     apiFactory: () -> AuthApi,
     storeFactory: () -> TokenStore,
+    private val accountUid: () -> Long = { SessionManager.loggedInUid },
 ) : SessionProvider {
     private val api by lazy(apiFactory)
     private val tokenStore by lazy(storeFactory)
@@ -57,7 +58,7 @@ internal constructor(
     }
 
     override fun currentAccessToken(): String? {
-        val uid = SessionManager.loggedInUid
+        val uid = accountUid()
         if (uid <= 0L) {
             // Do not remove/sync MMKV on every protected request while logged
             // out. A persisted session still gets erased exactly once.
@@ -160,7 +161,7 @@ internal constructor(
     }
 
     private fun bootstrapBlocking(): String? {
-        val uid = SessionManager.loggedInUid
+        val uid = accountUid()
         if (uid <= 0L) return null
         if (SystemClock.elapsedRealtime() < nextBootstrapAtElapsed) {
             AuthLog.debug("bootstrap suppressed by transient-failure backoff uid=$uid")
@@ -228,7 +229,7 @@ internal constructor(
             synchronized(loadLock) {
                 (currentSession() ?: return null) to stateVersion
             }
-        val uid = SessionManager.loggedInUid
+        val uid = accountUid()
         if (!session.isValidFor(uid)) return null
         AuthLog.debug("session refresh started uid=$uid generation=${session.generation}")
         val attemptId =
@@ -296,7 +297,7 @@ internal constructor(
 
     private fun persistAndPublish(session: AuthSession, expectedStateVersion: Long): AuthSession? {
         return synchronized(loadLock) {
-            if (stateVersion != expectedStateVersion || SessionManager.loggedInUid != session.uid) {
+            if (stateVersion != expectedStateVersion || accountUid() != session.uid) {
                 return@synchronized null
             }
             try {

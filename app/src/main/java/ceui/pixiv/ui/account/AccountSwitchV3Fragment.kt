@@ -220,7 +220,12 @@ class AccountSwitchV3Fragment : Fragment(R.layout.fragment_account_switch_v3) {
         val others = accounts.filter { it.user.id != current?.user?.id }
         binding.othersContainer.removeAllViews()
         others.forEachIndexed { index, account ->
-            binding.othersContainer.addView(buildRow(account, index, others.size))
+            val row = buildRow(account, index, others.size)
+            if (current == null && index == 0) {
+                row.findViewById<TextView>(R.id.row_account_badge)
+                    .setText(R.string.account_switch_primary_badge)
+            }
+            binding.othersContainer.addView(row)
         }
         binding.othersEmpty.isVisible = others.isEmpty()
         binding.othersHint.isVisible = others.isNotEmpty()
@@ -278,6 +283,8 @@ class AccountSwitchV3Fragment : Fragment(R.layout.fragment_account_switch_v3) {
         row.rowHandle.isVisible = row.rowHandle.text.isNotEmpty()
         row.rowMail.text = user.mail_address?.takeIf { it.isNotBlank() }
             ?: getString(R.string.no_mail_address)
+        row.rowAccountBadge.background = pill(palette.alpha20)
+        row.rowAccountBadge.setTextColor(palette.textAccent)
         row.rowPremiumBadge.isVisible = user.is_premium == true
         bindLoginTime(row.rowTime, account.loginTime)
         avatarGlide.load(GlideUtil.getHead(user))

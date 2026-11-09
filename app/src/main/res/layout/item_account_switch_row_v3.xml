@@ -109,6 +109,17 @@
             tools:text="wokome_official@pixshaft.com" />
 
         <TextView
+            android:id="@+id/row_account_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"
+            android:text="@string/account_switch_extension_badge"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
             android:id="@+id/row_time"
             style="@style/textMontserratRegular"
             android:layout_width="match_parent"

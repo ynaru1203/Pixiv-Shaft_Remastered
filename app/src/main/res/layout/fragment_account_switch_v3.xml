@@ -172,7 +172,7 @@
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="11dp"
                         android:paddingVertical="5dp"
-                        android:text="@string/account_switch_current_badge"
+                        android:text="@string/account_switch_primary_badge"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 

@@ -1,6 +1,11 @@
 package ceui.lisa.repo
 
 import ceui.lisa.BuildConfig
+import ceui.lisa.activities.Shaft
+import ceui.lisa.database.AppDatabase
+import ceui.pixiv.auth.AuthNetwork
+import ceui.pixiv.auth.BackendSessionManager
+import ceui.pixiv.safe.auth.TokenStore
 import ceui.pixiv.api.Client
 import ceui.loxia.User
 import ceui.pixiv.shaftapi.Nana7miPayload
@@ -32,6 +37,10 @@ internal class Nana7miAccountSession(
     /** Durable outbox for the refreshed-token / invalid-token reports this session emits. */
     private val outbox: AccountOnlineReportOutbox,
 ) {
+
+    var rotateOnQuota = false
+    private var alternateUid: Long? = null
+    private var alternateSession: BackendSessionManager? = null
 
     @Volatile
     var payload: Nana7miPayload? = null
@@ -109,7 +118,7 @@ internal class Nana7miAccountSession(
      * Fetch one account. The server classifies it at 55 minutes; an expired account is refreshed
      * on the client and re-reported before it is returned to the search request.
      */
-    suspend fun fetchReady(requestId: String? = null): Nana7miResult {
+    suspend fun fetchReady(requestId: String? = null, firstPage: Boolean = false): Nana7miResult {
         // Defense in depth: repository routing already disables borrowing in Lite, but keeping the
         // network boundary closed prevents a future caller from accidentally bypassing that gate.
         if (BuildConfig.IS_LITE) return Nana7miResult.DisabledForLite
@@ -118,25 +127,52 @@ internal class Nana7miAccountSession(
             "stage=fetch event=request requester_uid=%d",
             requesterUid,
         )
-        val fetched = if (requestId == null) {
-            // Legacy servers cannot deduplicate quota consumption, so never replay their dispatch.
-            Client.pixshaft.fetchNana7mi(requesterUid, null)
-        } else {
-            retryNana7miNetworkResult(
-                stage = "dispatch",
-                failureOf = { (it as? Nana7miResult.NetworkFailure)?.cause },
+        suspend fun dispatch(uid: Long, id: String?, session: BackendSessionManager?): Nana7miResult =
+            if (id == null) {
+                Client.pixshaft.fetchNana7mi(uid, null, session)
+            } else {
+                retryNana7miNetworkResult(
+                    stage = "dispatch",
+                    failureOf = { (it as? Nana7miResult.NetworkFailure)?.cause },
+                ) {
+                    Client.pixshaft.fetchNana7mi(uid, id, session)
+                }
+            }
+
+        val priorUid = alternateUid
+        var fetched = dispatch(priorUid ?: requesterUid, requestId, alternateSession)
+        if (rotateOnQuota && (fetched as? Nana7miResult.RateLimited)?.isQuota == true) {
+            val savedUids = withContext(Dispatchers.IO) {
+                AppDatabase.getAppDatabase(Shaft.getContext()).downloadDao().allUser
+                    .map { it.userID }
+                    .filter { it > 0 && it != requesterUid }
+                    .distinct()
+            }
+            if (firstPage && savedUids.isEmpty() && priorUid == null &&
+                SessionManager.loggedInUid == requesterUid
             ) {
-                // The same id is mandatory: the first request may have reached the server even if
-                // its response did not reach us. Server-side idempotency makes that replay free.
-                Client.pixshaft.fetchNana7mi(requesterUid, requestId)
+                Nana7miQuotaNotice.report(requesterUid, fetched as Nana7miResult.RateLimited)
+            }
+            for (uid in savedUids) {
+                if (uid == priorUid) continue
+                if (SessionManager.loggedInUid != requesterUid) break
+                val session = BackendSessionManager(
+                    { AuthNetwork.api },
+                    { TokenStore("pixshaft-search-auth-$uid") },
+                    { uid },
+                )
+                val result = dispatch(uid, requestId, session)
+                if ((result as? Nana7miResult.RateLimited)?.isQuota == true) continue
+                if (result is Nana7miResult.HttpFailure && (result.status == 401 || result.status == 403)) continue
+                fetched = result
+                if (result is Nana7miResult.Success) {
+                    alternateUid = uid
+                    alternateSession = session
+                }
+                break
             }
         }
         logFetchResult(requesterUid, fetched)
-        if (fetched is Nana7miResult.RateLimited) {
-            // 配额拒绝对用户是可见事实（结果会静默降级成热度预览），限流拒绝不是。
-            // 这里是插画和小说两个搜索仓库共用的唯一借号入口，报在这里就不用各报一遍。
-            Nana7miQuotaNotice.report(fetched)
-        }
         if (fetched is Nana7miResult.NotPremium) {
             // 服务端派发池只收 is_premium = 1，走到这里说明那一行的分类和 blob 对不上。把这份
             // AccountResponse 原样报回去，saveOnline 会按 blob 里的真实会员状态重新分类并停止派发。
